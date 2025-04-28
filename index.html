@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Public Transport - Live Tracking</title>
+    <link rel="stylesheet" href="css.css">
+    <!-- Google Maps API (your key) -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDjly1pgtmseHzZyBMt1mDWj95rVEe7cOc"></script>
+    <!-- Google Maps API (your additional key) -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDjly1pgtmseHzZyBMt1mDWj95rVEe7cOc"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Config and Firestore Initialization -->
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCV8AnDq8hyQ25Kuvu1EBqIHiXbE-fsvxk",
+            authDomain: "smartbusapp-ed919.firebaseapp.com",
+            projectId: "smartbusapp-ed919",
+            storageBucket: "smartbusapp-ed919.firebasestorage.app",
+            messagingSenderId: "449939813331",
+            appId: "1:449939813331:web:7d0dc29c9d1201aed8f526",
+            measurementId: "G-LY0FB8S53N"
+        };
+        
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(app);
+    </script>
+</head>
+<body>
+
+<header>
+    <h1>🚍 Smart Public Transport</h1>
+</header>
+
+<nav>
+    <a href="#tracking">Live Tracking</a>
+    <a href="#routes">Routes</a>
+    <a href="#alerts">Alerts</a>
+    <a href="#emergency">Emergency</a>
+</nav>
+
+<main>
+    <section id="tracking">
+        <h2>🛰️ Live Bus Tracking</h2>
+        <div id="map"></div>
+
+        <!-- Additional Map -->
+        <div id="map" style="height:400px;width:100%;"></div>
+
+        <div id="bus-info">
+            <h3>Bus Information</h3>
+            <p><strong>Bus ID:</strong> <span id="bus-id">Loading...</span></p>
+            <p><strong>Location:</strong> <span id="bus-location">Loading...</span></p>
+            <p><strong>Passenger Count:</strong> <span id="passenger-count">Loading...</span></p>
+        </div>
+
+        <!-- Add Button to Upload Bus Stops -->
+        <h2>📝 Add Bus Stops to Firebase</h2>
+        <button onclick="addBusStopData()">Add Bus Stops</button>
+
+    </section>
+
+    <!-- Form to get route -->
+    <form id="route-form">
+        <input type="text" id="start" placeholder="Start Location (e.g. Chennai Central)">
+        <input type="text" id="end" placeholder="End Location (e.g. Anna Nagar)">
+        <button type="submit">Get Route</button>
+    </form>
+
+    <section id="routes">
+        <h2>🛣️ Plan Your Route</h2>
+        <div id="route-results"></div>
+    </section>
+
+    <section id="alerts">
+        <h2>🔔 Notifications</h2>
+        <div id="notification-list">No alerts yet.</div>
+    </section>
+
+    <section id="emergency">
+        <h2>🚨 Emergency Reporting</h2>
+        <button id="report-emergency">Report Emergency</button>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2025 Smart Public Transport</p>
+</footer>
+
+<script src="script.js"></script>
+
+<!-- Bus Stops Adding Script -->
+<script>
+    function addBusStopData() {
+        // Bus Stop data
+        const busStops = [
+            {
+                name: "Chennai Central Railway Station",
+                latitude: 13.0878,
+                longitude: 80.2785
+            },
+            {
+                name: "Mylapore",
+                latitude: 13.0322,
+                longitude: 80.2628
+            },
+            {
+                name: "T. Nagar",
+                latitude: 13.0320,
+                longitude: 80.2385
+            },
+            {
+                name: "Vadapalani",
+                latitude: 13.0475,
+                longitude: 80.2150
+            },
+            {
+                name: "Anna Nagar",
+                latitude: 13.0876,
+                longitude: 80.2144
+            }
+        ];
+
+        // Loop through bus stops and add each one to Firestore
+        busStops.forEach((stop, index) => {
+            const busStopRef = db.collection("busStops").doc(`stop${index + 1}`);
+            busStopRef.set({
+                name: stop.name,
+                location: new firebase.firestore.GeoPoint(stop.latitude, stop.longitude)
+            })
+            .then(() => {
+                console.log(`Bus Stop ${stop.name} added to Firestore`);
+            })
+            .catch((error) => {
+                console.error("Error adding bus stop: ", error);
+            });
+        });
+    }
+</script>
+
+<!-- Additional Map Script -->
+<script>
+let map;
+let marker;
+
+function initMap() {
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat: 0, lng: 0},
+    zoom: 15
+  });
+  marker = new google.maps.Marker({position: {lat: 0, lng: 0}, map: map});
+}
+
+window.onload = initMap;
+</script>
+
+</body>
+</html>
